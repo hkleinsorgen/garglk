@@ -562,6 +562,15 @@ struct glk_schannel_struct
     glui32 loop;
     int notify;
     int buffered;
+	int paused;
+
+	/* for volume fades */
+	int volume_notify;
+	int volume_timeout;
+	int target_volume;
+	double float_volume;
+	double volume_delta;
+	void *timer;
 
     gidispatch_rock_t disprock;
     channel_t *chain_next, *chain_prev;
@@ -778,6 +787,10 @@ void gli_clipboard_copy(glui32 *buf, int len);
 void gli_start_selection(int x, int y);
 void gli_resize_mask(unsigned int x, unsigned int y);
 void gli_move_selection(int x, int y);
+
+void gli_invalidate_volume_timer(void *volume_timer);
+void *gli_create_volume_timer(schanid_t chan, double duration);
+void gli_fade(schanid_t chan);
 
 void attrset(attr_t *attr, glui32 style);
 void attrclear(attr_t *attr);
