@@ -87,6 +87,35 @@ void glk_request_timer_events(glui32 millisecs)
     }
 }
 
+void volume_timer_callback(void *data)
+{
+    schanid_t chan = (schanid_t)data;
+    gli_fade(chan);
+	  return TRUE;
+}
+
+void *gli_create_volume_timer(schanid_t chan, double millisecs)
+{
+    int timeout_id = 0;
+
+    if (millisecs)
+    {
+        timeout_id = g_timeout_add(millisecs, volume_timer_callback, (void *)chan);
+    }
+
+    return (void *)timeout_id;
+}
+
+void gli_invalidate_volume_timer(void *volume_timer)
+{
+    int timeout_id = (int)volume_timer;
+
+    if (timeout_id)
+    {
+        g_source_remove(timeout_id);
+    }
+}
+
 void winabort(const char *fmt, ...)
 {
     va_list ap;
