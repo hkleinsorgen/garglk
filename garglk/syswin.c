@@ -87,6 +87,21 @@ void glk_request_timer_events(glui32 millisecs)
     }
 }
 
+void volume_timer_callback(void *data)
+{
+	/* stub */
+}
+
+void *gli_create_volume_timer(schanid_t chan, double millisecs)
+{
+	/* stub */
+}
+
+void gli_invalidate_volume_timer(void *volume_timer)
+{
+	/* stub */
+}
+
 void onabout(void)
 {
     char txt[512];
