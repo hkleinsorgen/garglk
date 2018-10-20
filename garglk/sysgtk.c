@@ -87,6 +87,35 @@ void glk_request_timer_events(glui32 millisecs)
     }
 }
 
+void volume_timer_callback(void *data)
+{
+    schanid_t chan = (schanid_t)data;
+    gli_fade(chan);
+	  return TRUE;
+}
+
+void *gli_create_volume_timer(schanid_t chan, double millisecs)
+{
+    int timeout_id = 0;
+
+    if (millisecs)
+    {
+        timeout_id = g_timeout_add(millisecs, volume_timer_callback, (void *)chan);
+    }
+
+    return (void *)timeout_id;
+}
+
+void gli_invalidate_volume_timer(void *volume_timer)
+{
+    int timeout_id = (int)volume_timer;
+
+    if (timeout_id)
+    {
+        g_source_remove(timeout_id);
+    }
+}
+
 void winabort(const char *fmt, ...)
 {
     va_list ap;
@@ -540,25 +569,25 @@ void winopen(void)
                                | GDK_POINTER_MOTION_MASK
                                | GDK_POINTER_MOTION_HINT_MASK
                                | GDK_SCROLL_MASK);
-    gtk_signal_connect(GTK_OBJECT(frame), "button_press_event", 
+    gtk_signal_connect(GTK_OBJECT(frame), "button_press_event",
                        GTK_SIGNAL_FUNC(onbuttondown), NULL);
-    gtk_signal_connect(GTK_OBJECT(frame), "button_release_event", 
+    gtk_signal_connect(GTK_OBJECT(frame), "button_release_event",
                        GTK_SIGNAL_FUNC(onbuttonup), NULL);
-    gtk_signal_connect(GTK_OBJECT(frame), "scroll_event", 
+    gtk_signal_connect(GTK_OBJECT(frame), "scroll_event",
                        GTK_SIGNAL_FUNC(onscroll), NULL);
-    gtk_signal_connect(GTK_OBJECT(frame), "key_press_event", 
+    gtk_signal_connect(GTK_OBJECT(frame), "key_press_event",
                        GTK_SIGNAL_FUNC(onkeydown), NULL);
-    gtk_signal_connect(GTK_OBJECT(frame), "key_release_event", 
+    gtk_signal_connect(GTK_OBJECT(frame), "key_release_event",
                        GTK_SIGNAL_FUNC(onkeyup), NULL);
-    gtk_signal_connect(GTK_OBJECT(frame), "destroy", 
+    gtk_signal_connect(GTK_OBJECT(frame), "destroy",
                        GTK_SIGNAL_FUNC(onquit), "WM destroy");
     gtk_signal_connect(GTK_OBJECT(frame), "motion_notify_event",
         GTK_SIGNAL_FUNC(onmotion), NULL);
 
     canvas = gtk_drawing_area_new();
-    gtk_signal_connect(GTK_OBJECT(canvas), "size_allocate", 
+    gtk_signal_connect(GTK_OBJECT(canvas), "size_allocate",
                        GTK_SIGNAL_FUNC(onresize), NULL);
-    gtk_signal_connect(GTK_OBJECT(canvas), "expose_event", 
+    gtk_signal_connect(GTK_OBJECT(canvas), "expose_event",
                        GTK_SIGNAL_FUNC(onexpose), NULL);
     gtk_container_add(GTK_CONTAINER(frame), canvas);
 
@@ -578,7 +607,7 @@ void winopen(void)
         defh = monitor.height;
         gtk_window_set_decorated(GTK_WINDOW(frame), FALSE);
         gtk_window_set_position(GTK_WINDOW(frame), GTK_WIN_POS_CENTER);
-        gtk_window_fullscreen(GTK_WINDOW(frame));       
+        gtk_window_fullscreen(GTK_WINDOW(frame));
     }
 
     wintitle();

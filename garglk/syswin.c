@@ -49,6 +49,7 @@ static HWND hwndview, hwndframe;
 static HDC hdc;
 static BITMAPINFO *dibinf;
 static void CALLBACK timeproc(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+
 static LRESULT CALLBACK frameproc(HWND, UINT, WPARAM, LPARAM);
 static LRESULT CALLBACK viewproc(HWND, UINT, WPARAM, LPARAM);
 static HCURSOR idc_arrow, idc_hand, idc_ibeam;
@@ -85,6 +86,21 @@ void glk_request_timer_events(glui32 millisecs)
         timer = timeSetEvent(millisecs, 0, timeproc, 0, TIME_PERIODIC);
         timerid = 1;
     }
+}
+
+void volume_timer_callback(void *data)
+{
+	/* stub */
+}
+
+void *gli_create_volume_timer(schanid_t chan, double millisecs)
+{
+	/* stub */
+}
+
+void gli_invalidate_volume_timer(void *volume_timer)
+{
+	/* stub */
 }
 
 void onabout(void)
@@ -233,7 +249,7 @@ void winclipsend(void)
     if(OpenClipboard(NULL)) {
         if (!SetClipboardData(CF_UNICODETEXT, wmem))
             GlobalFree(wmem);
-        CloseClipboard(); 
+        CloseClipboard();
     }
 }
 
@@ -259,7 +275,7 @@ void winclipreceive(void)
             }
             GlobalUnlock(rmem);
         }
-        CloseClipboard(); 
+        CloseClipboard();
     }
 }
 
@@ -274,7 +290,7 @@ void wininit(int *argc, char **argv)
     wc.lpfnWndProc = frameproc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
-    wc.hInstance = GetModuleHandle(NULL); 
+    wc.hInstance = GetModuleHandle(NULL);
     wc.hIcon = LoadIcon(wc.hInstance, "IDI_GAPP");
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = 0;
@@ -377,7 +393,7 @@ void winopen()
         HMONITOR hmon = MonitorFromWindow(hwndframe, MONITOR_DEFAULTTONEAREST);
         MONITORINFO mi = { sizeof(mi) };
         GetMonitorInfo(hmon, &mi);
-        SetWindowPos(hwndframe, 
+        SetWindowPos(hwndframe,
             NULL,
             mi.rcMonitor.left,
             mi.rcMonitor.top,
@@ -396,7 +412,7 @@ void onfullscreen()
     DestroyWindow(hwndframe);
     switchingfullscreen = 0;
     winopen();
-    
+
 }
 
 
@@ -790,7 +806,7 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         winclipreceive();
         return 0;
     }
-    
+
     case WM_SYSKEYDOWN:
     {
         if (wParam == VK_RETURN && (HIWORD(lParam) & KF_ALTDOWN))
