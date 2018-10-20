@@ -188,6 +188,10 @@ static void cleanup_channel(schanid_t chan)
     chan->status = CHANNEL_IDLE;
     chan->sdl_channel = -1;
     chan->music = 0;
+
+    if (chan->timer)
+		gli_invalidate_volume_timer(chan->timer);
+	chan->timer = NULL;
 }
 
 void glk_schannel_destroy(schanid_t chan)
