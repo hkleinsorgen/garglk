@@ -338,8 +338,6 @@ void gli_fade(schanid_t chan)
 	}
 }
 
-
-
 void glk_schannel_set_volume(schanid_t chan, glui32 vol)
 {
 	glk_schannel_set_volume_ext(chan, vol, 0, 0);
