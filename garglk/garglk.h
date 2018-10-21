@@ -788,10 +788,6 @@ void gli_start_selection(int x, int y);
 void gli_resize_mask(unsigned int x, unsigned int y);
 void gli_move_selection(int x, int y);
 
-void gli_invalidate_volume_timer(void *volume_timer);
-void *gli_create_volume_timer(schanid_t chan, double duration);
-void gli_fade(schanid_t chan);
-
 void attrset(attr_t *attr, glui32 style);
 void attrclear(attr_t *attr);
 int attrequal(attr_t *a1, attr_t *a2);

@@ -64,7 +64,7 @@ void gli_initialize_sound(void)
 {
     if (gli_conf_sound == 1)
     {
-        if (SDL_Init(SDL_INIT_AUDIO) == -1)
+        if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_TIMER) == -1)
         {
             gli_strict_warning("SDL init failed\n");
             gli_strict_warning(SDL_GetError());
@@ -189,7 +189,7 @@ static void cleanup_channel(schanid_t chan)
     chan->music = 0;
 
     if (chan->timer)
-        gli_invalidate_volume_timer(chan->timer);
+        SDL_RemoveTimer((SDL_TimerID)chan->timer);
 
     chan->timer = NULL;
 }
@@ -278,6 +278,12 @@ void glk_sound_load_hint(glui32 snd, glui32 flag)
     /* nop */
 }
 
+Uint32 volume_timer_callback(Uint32 interval, void *param)
+{
+	gli_fade((schanid_t)param);
+	return(interval);
+}
+
 /** Start a fade timer */
 void init_fade(schanid_t chan, int volume, int duration, int notify)
 {
@@ -298,9 +304,9 @@ void init_fade(schanid_t chan, int volume, int duration, int notify)
     chan->volume_timeout = FADE_GRANULARITY;
 
     if (chan->timer)
-        gli_invalidate_volume_timer(chan->timer);
+        SDL_RemoveTimer((SDL_TimerID)chan->timer);
 
-    chan->timer = gli_create_volume_timer(chan, duration / FADE_GRANULARITY);
+	chan->timer = (void *)SDL_AddTimer((Uint32)(duration / FADE_GRANULARITY), volume_timer_callback, (void *)chan);
 
     if (!chan->timer)
     {
@@ -349,7 +355,7 @@ void gli_fade(schanid_t chan)
             gli_strict_warning("gli_fade: invalid timer.");
             return;
         }
-        gli_invalidate_volume_timer(chan->timer);
+        SDL_RemoveTimer((SDL_TimerID)chan->timer);
         chan->timer = NULL;
 
         if (chan->volume != chan->target_volume)
