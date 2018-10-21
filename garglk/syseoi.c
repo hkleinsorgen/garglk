@@ -144,34 +144,6 @@ void glk_request_timer_events(glui32 millisecs)
     }
 }
 
-static Eina_Bool volume_timer_callback(void *data)
-{
-    gli_fade((schanid_t)data);
-    return ECORE_CALLBACK_RENEW;
-}
-
-void *gli_create_volume_timer(schanid_t chan, double millisecs)
-{
-    Ecore_Timer *vol_timer = NULL;
-
-    if (millisecs)
-    {
-        vol_timer = ecore_timer_add(millisecs / 1000.0, volume_timer_callback, chan);
-    }
-
-	  return (void *)vol_timer;
-}
-
-void gli_invalidate_volume_timer(void *volume_timer)
-{
-    Ecore_Time *vol_timer = (Ecore_Time *)volume_timer;
-
-    if (vol_timer)
-    {
-        ecore_timer_del(vol_timer);
-    }
-}
-
 void winabort(const char *fmt, ...)
 {
     va_list ap;
