@@ -281,6 +281,12 @@ void glk_sound_load_hint(glui32 snd, glui32 flag)
 /** Start a fade timer */
 void init_fade(schanid_t chan, int volume, int duration, int notify)
 {
+	if (!chan)
+	{
+		gli_strict_warning("init_fade: invalid channel.");
+		return;
+	}
+
 	chan->volume_notify = notify;
 
 	/* Convert requested Glk Volume to SDL Volume */
@@ -291,12 +297,27 @@ void init_fade(schanid_t chan, int volume, int duration, int notify)
 
 	chan->volume_timeout = FADE_GRANULARITY;
 
+	if (chan->timer)
+			gli_invalidate_volume_timer(chan->timer);
+
 	chan->timer = gli_create_volume_timer(chan, duration / FADE_GRANULARITY);
+
+	if (!chan->timer)
+	{
+		gli_strict_warning("init_fade: failed to create volume change timer.");
+		return;
+	}
 }
 
 /** Make an incremental volume change when the fade timer fires */
 void gli_fade(schanid_t chan)
 {
+	if (!chan)
+	{
+		gli_strict_warning("gli_fade: invalid channel.");
+		return;
+	}
+
 	chan->float_volume += chan->volume_delta;
 
 	if (chan->float_volume < 0)
@@ -315,25 +336,29 @@ void gli_fade(schanid_t chan)
 	chan->volume_timeout--;
 
 	/* If the timer has fired FADE_GRANULARITY times, kill it */
-	if (chan->volume_timeout == 0)
+	if (chan->volume_timeout <= 0)
 	{
 		if (chan->volume_notify)
 		{
-			gli_event_store(evtype_VolumeNotify, 0,
+				gli_event_store(evtype_VolumeNotify, 0,
                          0, chan->volume_notify);
-        }
+		}
 
+		if (!chan->timer)
+		{
+			gli_strict_warning("gli_fade: invalid timer.");
+			return;
+		}
 		gli_invalidate_volume_timer(chan->timer);
 		chan->timer = NULL;
 
-
 		if (chan->volume != chan->target_volume)
 		{
-			chan->volume = chan->target_volume;
-			if (chan->status == CHANNEL_SOUND)
-				Mix_Volume(chan->sdl_channel, chan->volume);
-			else if (chan->status == CHANNEL_MUSIC)
-				Mix_VolumeMusic(chan->volume);
+				chan->volume = chan->target_volume;
+				if (chan->status == CHANNEL_SOUND)
+						Mix_Volume(chan->sdl_channel, chan->volume);
+				else if (chan->status == CHANNEL_MUSIC)
+						Mix_VolumeMusic(chan->volume);
 		}
 	}
 }
@@ -370,7 +395,7 @@ void glk_schannel_set_volume_ext(schanid_t chan, glui32 vol,
 	}
 	else
 	{
-		init_fade(chan, vol, duration, notify);
+			init_fade(chan, vol, duration, notify);
 	}
 }
 
@@ -384,7 +409,7 @@ static void music_completion_callback()
     }
     if (music_channel->notify && music_channel->resid)
     {
-		gli_event_store(evtype_SoundNotify, 0,
+				gli_event_store(evtype_SoundNotify, 0,
                          music_channel->resid, music_channel->notify);
     }
     cleanup_channel(music_channel);
@@ -400,9 +425,9 @@ static void sound_completion_callback(int chan)
         if (!sound_channel)
             fprintf(stderr, "sound_channel %d is NULL\n", chan);
         if (Mix_Playing(chan))
-		{
+				{
             fprintf(stderr, "Mix_Playing(%d) is TRUE\n", chan);
-		}
+				}
         return;
     }
 
@@ -410,7 +435,7 @@ static void sound_completion_callback(int chan)
     {
         if (sound_channel->notify)
         {
-			gli_event_store(evtype_SoundNotify, 0,
+						gli_event_store(evtype_SoundNotify, 0,
                             sound_channel->resid, sound_channel->notify);
         }
         cleanup_channel(sound_channel);
@@ -425,7 +450,7 @@ static void sound_completion_callback(int chan)
         {
             if (sound_channel->notify)
             {
-				gli_event_store(evtype_SoundNotify, 0,
+								gli_event_store(evtype_SoundNotify, 0,
                                 sound_channel->resid, sound_channel->notify);
             }
             cleanup_channel(sound_channel);
