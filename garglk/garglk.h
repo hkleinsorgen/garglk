@@ -791,6 +791,7 @@ void gli_move_selection(int x, int y);
 void gli_invalidate_volume_timer(void *volume_timer);
 void *gli_create_volume_timer(schanid_t chan, double duration);
 void gli_fade(schanid_t chan);
+void gli_sound_event_waiting(glui32 type, glui32 val1, glui32 val2);
 
 void attrset(attr_t *attr, glui32 style);
 void attrclear(attr_t *attr);

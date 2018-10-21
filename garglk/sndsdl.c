@@ -291,6 +291,9 @@ void init_fade(schanid_t chan, int volume, int duration, int notify)
 
 	chan->volume_timeout = FADE_GRANULARITY;
 
+	if chan->timer:
+				gli_invalidate_volume_timer(chan->timer);
+
 	chan->timer = gli_create_volume_timer(chan, duration / FADE_GRANULARITY);
 }
 
@@ -319,7 +322,9 @@ void gli_fade(schanid_t chan)
 	{
 		if (chan->volume_notify)
 		{
-			gli_event_store(evtype_VolumeNotify, 0,
+			/*gli_event_store(evtype_VolumeNotify, 0,
+                         0, chan->volume_notify);*/
+        	gli_sound_event_waiting(evtype_VolumeNotify,
                          0, chan->volume_notify);
         }
 
@@ -384,8 +389,9 @@ static void music_completion_callback()
     }
     if (music_channel->notify && music_channel->resid)
     {
-		gli_event_store(evtype_SoundNotify, 0,
-                         music_channel->resid, music_channel->notify);
+				/*gli_event_store(evtype_SoundNotify, 0,
+                        music_channel->resid, music_channel->notify);*/
+				gli_sound_event_waiting(evtype_SoundNotify, music_channel->resid, music_channel->notify);
     }
     cleanup_channel(music_channel);
 }
@@ -410,8 +416,8 @@ static void sound_completion_callback(int chan)
     {
         if (sound_channel->notify)
         {
-			gli_event_store(evtype_SoundNotify, 0,
-                            sound_channel->resid, sound_channel->notify);
+			/*gli_event_store(evtype_SoundNotify, 0,
+                            sound_channel->resid, sound_channel->notify);*/        			gli_sound_event_waiting(evtype_SoundNotify,sound_channel->resid,sound_channel->notify);
         }
         cleanup_channel(sound_channel);
         sound_channels[chan] = 0;
@@ -425,7 +431,9 @@ static void sound_completion_callback(int chan)
         {
             if (sound_channel->notify)
             {
-				gli_event_store(evtype_SoundNotify, 0,
+				/*gli_event_store(evtype_SoundNotify, 0,
+                                sound_channel->resid, sound_channel->notify);*/
+        		gli_sound_event_waiting(evtype_SoundNotify,
                                 sound_channel->resid, sound_channel->notify);
             }
             cleanup_channel(sound_channel);

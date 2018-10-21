@@ -36,24 +36,35 @@ static volatile int gli_event_waiting = FALSE;
 static volatile int gli_mach_allowed = FALSE;
 static volatile int gli_window_alive = TRUE;
 
+static volatile int sound_event_type = 0;
+static volatile int sound_event_val1 = 0;
+static volatile int sound_event_val2 = 0;
+
 #define kArrowCursor 1
 #define kIBeamCursor 2
 #define kPointingHandCursor 3
 
 void wintick(CFRunLoopTimerRef timer, void *info);
+void wintick2(CFRunLoopTimerRef timer, void *info);
 
 @interface GargoyleMonitor : NSObject
 {
     NSRect size;
     CFRunLoopTimerRef timerid;
-    int timeouts;
+    CFRunLoopTimerRef timerid2;
+    BOOL timeouts;
+    BOOL timeouts2;
+
 }
 - (id) init;
 - (void) sleep;
 - (void) track: (CFTimeInterval) seconds;
 - (void) tick;
+- (void) tick2;
 - (BOOL) timeout;
+- (BOOL) timeout2;
 - (void) reset;
+- (void) reset2;
 - (void) connectionDied: (NSNotification *) notice;
 @end
 
@@ -64,14 +75,16 @@ void wintick(CFRunLoopTimerRef timer, void *info);
     self = [super init];
 
     timerid = 0;
-    timeouts = 0;
+    timerid2 = 0;
+    timeouts = NO;
+    timeouts2 = NO;
 
     return self;
 }
 
 - (void) sleep
 {
-    while (!timeouts && !gli_event_waiting)
+    while (!timeouts && !timeouts2 && !gli_event_waiting)
     {
         if (!gli_window_alive)
             exit(1);
@@ -90,7 +103,7 @@ void wintick(CFRunLoopTimerRef timer, void *info);
             CFRunLoopTimerInvalidate(timerid);
         CFRelease(timerid);
         timerid = 0;
-        timeouts = 0;
+        timeouts = NO;
     }
 
     if (seconds)
@@ -102,20 +115,71 @@ void wintick(CFRunLoopTimerRef timer, void *info);
     }
 }
 
+- (void) track2: (CFTimeInterval) seconds
+{
+    fprintf(stderr, "monitor track2\n");
+
+    if (timerid2)
+    {
+        fprintf(stderr, "invalidating timerid2\n");
+
+        if (CFRunLoopTimerIsValid(timerid2))
+            CFRunLoopTimerInvalidate(timerid2);
+        CFRelease(timerid2);
+        timerid2 = 0;
+        timeouts2 = NO;
+    }
+
+    if (seconds)
+    {
+        fprintf(stderr, "starting new timerid2. Seconds:%f\n", seconds);
+
+        timerid2 = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + seconds, seconds,
+                                       0, 0, &wintick2, NULL);
+        if (timerid2)
+            CFRunLoopAddTimer([[NSRunLoop currentRunLoop] getCFRunLoop], timerid2, kCFRunLoopDefaultMode);
+    }
+}
+
 - (void) tick
 {
-    timeouts++;
+    fprintf(stderr, "monitor tick\n");
+
+    timeouts=YES;
+    CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
+}
+
+- (void) tick2
+{
+    fprintf(stderr, "monitor tick2\n");
+
+    timeouts2=YES;
     CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
 }
 
 - (BOOL) timeout
 {
-    return (timeouts != 0);
+    return timeouts;
+}
+
+- (BOOL) timeout2
+{
+    return timeouts2;
 }
 
 - (void) reset
 {
-    timeouts = 0;
+
+    fprintf(stderr, "monitor reset\n");
+
+    timeouts = NO;
+}
+
+- (void) reset2
+{
+    fprintf(stderr, "monitor reset2\n");
+
+    timeouts2 = NO;
 }
 
 - (void) connectionDied: (NSNotification *) notice
@@ -176,8 +240,17 @@ void gli_invalidate_volume_timer(void *volume_timer)
 
 void wintick(CFRunLoopTimerRef timer, void *info)
 {
+    fprintf(stderr, "timer event timer fired!\n");
+
     [monitor tick];
 }
+
+void wintick2(CFRunLoopTimerRef timer2, void *info2)
+{
+    fprintf(stderr, "sound event timer fired!\n");
+    [monitor tick2];
+}
+
 
 void winabort(const char *fmt, ...)
 {
@@ -186,6 +259,19 @@ void winabort(const char *fmt, ...)
     va_start(ap, fmt);
     vsprintf(buf, fmt, ap);
     va_end(ap);
+
+    /* Invalidate any volume timers. I'm not sure if this is needed or if this is the right place to do it */
+    schanid_t chan = glk_schannel_iterate(0, 0);
+
+	while (chan)
+	{
+	    if (chan->timer)
+	    {
+	        gli_invalidate_volume_timer(chan->timer);
+	        chan->timer = NULL;
+	    }
+		chan = glk_schannel_iterate(chan, 0);
+    }
 
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     [gargoyle abortWindowDialog: processID
@@ -203,7 +289,7 @@ void winexit(void)
 
 void winopenfile(char *prompt, char *buf, int len, int filter)
 {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];    
+    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     NSString * fileref = [gargoyle openWindowDialog: processID
                                              prompt: [NSString stringWithCString: prompt encoding: NSUTF8StringEncoding]
@@ -405,7 +491,7 @@ void wininit(int *argc, char **argv)
     gargoyle = (NSObject<GargoyleApp> *)[link rootProxy];
     [gargoyle retain];
 
-    /* listen for mach messages */ 
+    /* listen for mach messages */
     CFMachPortRef sigPort = CFMachPortCreate(NULL, winmach, NULL, NULL);
     gli_signal_port = CFMachPortGetPort(sigPort);
     [[NSRunLoop currentRunLoop] addPort: [NSMachPort portWithMachPort: gli_signal_port] forMode: NSDefaultRunLoopMode];
@@ -611,7 +697,7 @@ void winmouse(NSEvent *evt)
             if (gli_get_hyperlink(x, y))
                 [gargoyle setCursor: kPointingHandCursor];
             else
-                [gargoyle setCursor: kArrowCursor]; 
+                [gargoyle setCursor: kArrowCursor];
             break;
         }
 
@@ -706,7 +792,7 @@ void winpoll(void)
 }
 
 void gli_select(event_t *event, int polled)
-{ 
+{
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     gli_curevent = event;
@@ -717,7 +803,7 @@ void gli_select(event_t *event, int polled)
 
     if (gli_curevent->type == evtype_None && !polled)
     {
-        while (![monitor timeout])
+        while (!([monitor timeout] || [monitor timeout2]))
         {
             winloop();
             gli_dispatch_event(gli_curevent, polled);
@@ -729,11 +815,23 @@ void gli_select(event_t *event, int polled)
         }
     }
 
-    if (gli_curevent->type == evtype_None && [monitor timeout])
+    if (gli_curevent->type == evtype_None && ([monitor timeout] || [monitor timeout2]))
     {
-        gli_event_store(evtype_Timer, NULL, 0, 0);
-        gli_dispatch_event(gli_curevent, polled);
-        [monitor reset];
+        if ([monitor timeout2])
+        {
+            gli_event_store(sound_event_type,
+                        NULL, sound_event_val1, sound_event_val2);
+            gli_dispatch_event(gli_curevent, polled);
+
+            [monitor reset2];
+        }
+        else
+        {
+            gli_event_store(evtype_Timer, NULL, 0, 0);
+            gli_dispatch_event(gli_curevent, polled);
+
+            [monitor reset];
+        }
     }
 
     gli_curevent = NULL;
@@ -756,4 +854,16 @@ void wincounter(glktimeval_t *time)
     time->high_sec = 0;
     time->low_sec  = (unsigned int) ((micro / 1000000) & 0xFFFFFFFF);
     time->microsec = (unsigned int) ((micro % 1000000) & 0xFFFFFFFF);
+}
+
+
+void gli_sound_event_waiting(glui32 type, glui32 val1, glui32 val2)
+{
+    fprintf(stderr, "sound event\n");
+
+    sound_event_type = type;
+    sound_event_val1 = val1;
+    sound_event_val2 = val2;
+    wintick2(0,0);
+    [monitor track2: ((double) 1000.0) / 1000];
 }
