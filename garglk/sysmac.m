@@ -146,32 +146,34 @@ void volume_timer_callback(CFRunLoopTimerRef timer, void *info)
 
 void *gli_create_volume_timer(schanid_t chan, double millisecs)
 {
-	CFRunLoopTimerRef timer_ref = NULL;
+    CFRunLoopTimerRef timer_ref = NULL;
 
-	CFRunLoopTimerContext context = {0, chan, NULL, NULL, 0};
+    CFRunLoopTimerContext context = {0, chan, NULL, NULL, 0};
 
     if (millisecs)
     {
-        timer_ref = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent(), millisecs / 1000, 0, 0, &volume_timer_callback, &context);
+        timer_ref = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent(),
+                        millisecs / 1000, 0, 0, &volume_timer_callback, &context);
         if (timer_ref)
-            CFRunLoopAddTimer([[NSRunLoop currentRunLoop] getCFRunLoop], timer_ref, kCFRunLoopDefaultMode);
+            CFRunLoopAddTimer([[NSRunLoop currentRunLoop] getCFRunLoop],
+                        timer_ref, kCFRunLoopDefaultMode);
     }
 
-	return (void *)timer_ref;
+    return (void *)timer_ref;
 }
 
 
 void gli_invalidate_volume_timer(void *volume_timer)
 {
-	CFRunLoopTimerRef timer_ref = (CFRunLoopTimerRef)volume_timer;
+    CFRunLoopTimerRef timer_ref = (CFRunLoopTimerRef)volume_timer;
 
-	if (timer_ref)
+    if (timer_ref)
     {
         if (CFRunLoopTimerIsValid(timer_ref))
             CFRunLoopTimerInvalidate(timer_ref);
+
         CFRelease(timer_ref);
     }
-
 }
 
 void wintick(CFRunLoopTimerRef timer, void *info)

@@ -91,7 +91,7 @@ void volume_timer_callback(void *data)
 {
     schanid_t chan = (schanid_t)data;
     gli_fade(chan);
-	  return TRUE;
+    return TRUE;
 }
 
 void *gli_create_volume_timer(schanid_t chan, double millisecs)
