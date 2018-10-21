@@ -87,19 +87,33 @@ void glk_request_timer_events(glui32 millisecs)
     }
 }
 
-void volume_timer_callback(void *data)
+LPTIMECALLBACK volume_timer_callback(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
 {
-	/* stub */
+    gli_fade((schanid_t)dwUser);
 }
 
 void *gli_create_volume_timer(schanid_t chan, double millisecs)
 {
-	/* stub */
+    MMRESULT vol_timer = 0;
+
+    if (millisecs)
+    {
+        timeBeginPeriod(1);
+        vol_timer = timeSetEvent(millisecs, 0, volume_timer_callback, (DWORD)chan, TIME_PERIODIC);
+    }
+
+    return (void *)vol_timer;
 }
 
 void gli_invalidate_volume_timer(void *volume_timer)
 {
-	/* stub */
+    MMRESULT vol_timer = (MMRESULT)volume_timer;
+
+    if (vol_timer)
+    {
+	    timeKillEvent(vol_timer);
+        timeEndPeriod(1);
+    }
 }
 
 void onabout(void)
