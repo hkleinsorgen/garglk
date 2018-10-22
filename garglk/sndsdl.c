@@ -313,6 +313,7 @@ Uint32 volume_timer_callback(Uint32 interval, void *param)
         {
             gli_event_store(evtype_VolumeNotify, 0,
                 0, chan->volume_notify);
+            gli_notification_waiting();
         }
 
         if (!chan->timer)
@@ -416,6 +417,7 @@ static void music_completion_callback()
     {
         gli_event_store(evtype_SoundNotify, 0, music_channel->resid,
             music_channel->notify);
+        gli_notification_waiting();
     }
     cleanup_channel(music_channel);
 }
@@ -442,6 +444,7 @@ static void sound_completion_callback(int chan)
         {
             gli_event_store(evtype_SoundNotify, 0,
                 sound_channel->resid, sound_channel->notify);
+            gli_notification_waiting();
         }
         cleanup_channel(sound_channel);
         sound_channels[chan] = 0;
@@ -457,6 +460,7 @@ static void sound_completion_callback(int chan)
             {
                 gli_event_store(evtype_SoundNotify, 0,
                     sound_channel->resid, sound_channel->notify);
+                gli_notification_waiting();
             }
             cleanup_channel(sound_channel);
             sound_channels[chan] = 0;
