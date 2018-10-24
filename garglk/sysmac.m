@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <mach/mach.h>
 #include <mach/mach_time.h>
 
 #include "glk.h"
