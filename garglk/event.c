@@ -126,6 +126,7 @@ void gli_event_store(glui32 type, window_t *win, glui32 val1, glui32 val2)
         case evtype_Arrange:
         case evtype_Redraw:
         case evtype_SoundNotify:
+        case evtype_VolumeNotify:
         case evtype_Timer:
             if (!gli_events_polled)
                 gli_events_polled = gli_initialize_queue();
