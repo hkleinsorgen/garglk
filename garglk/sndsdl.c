@@ -455,7 +455,7 @@ static void sound_completion_callback(int chan)
     if (!soundbytes)
     {
         /* -1 means loop forever */
-        if (sound_channel->loop > -1)
+        if (sound_channel->loop != -1)
             sound_channel->loop--;
 
         if (sound_channel->loop == 0)
