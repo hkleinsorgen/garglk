@@ -1474,7 +1474,7 @@ void glk_window_set_background_color(winid_t win, glui32 color)
     win_graphics_set_background_color(win->data, color);
 }
 
-void attrset(attr_t *attr, glui32 style)
+void gli_attrset(attr_t *attr, glui32 style)
 {
     attr->fgset = false;
     attr->bgset = false;

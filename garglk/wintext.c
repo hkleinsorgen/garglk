@@ -909,7 +909,7 @@ static void put_text(window_textbuffer_t *dwin, char *buf, int len, int pos, int
         for (i = 0; i < len; i++)
         {
             dwin->chars[pos + i] = buf[i];
-            attrset(&dwin->attrs[pos + i], style_Input);
+            gli_attrset(&dwin->attrs[pos + i], style_Input);
         }
     }
     dwin->numchars += diff;
@@ -946,7 +946,7 @@ static void put_text_uni(window_textbuffer_t *dwin, glui32 *buf, int len, int po
         int i;
         memmove(dwin->chars + pos, buf, len * 4);
         for (i = 0; i < len; i++)
-            attrset(&dwin->attrs[pos+i], style_Input);
+            gli_attrset(&dwin->attrs[pos+i], style_Input);
     }
     dwin->numchars += diff;
 
@@ -1239,7 +1239,7 @@ static void win_textbuffer_init_impl(window_t *win, void *buf, int maxlen, int i
     dwin->infence = dwin->numchars;
     dwin->incurs = dwin->numchars;
     dwin->origattr = win->attr;
-    attrset(&win->attr, style_Input);
+    gli_attrset(&win->attr, style_Input);
 
     dwin->historypos = dwin->historypresent;
 

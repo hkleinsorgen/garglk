@@ -51,7 +51,7 @@
 #include "glkstart.h"
 #include "garglk.h"
 
-#include GARGLKINI_H
+//#include GARGLKINI_H
 
 bool gli_utf8input = true;
 bool gli_utf8output = true;
@@ -366,7 +366,7 @@ std::string garglk::user_config()
     if (!f.is_open())
         throw std::runtime_error("Unable to open configuration file " + path + " for writing.");
 
-    f.write(reinterpret_cast<const char *>(garglkini), sizeof garglkini);
+//    f.write(reinterpret_cast<const char *>(garglkini), sizeof garglkini);
 
     if (f.bad())
     {

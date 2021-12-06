@@ -377,7 +377,7 @@ static void win_textgrid_init_impl(window_t *win, void *buf, int maxlen, int ini
     dwin->inorgx = dwin->curx;
     dwin->inorgy = dwin->cury;
     dwin->origattr = win->attr;
-    attrset(&win->attr, style_Input);
+    gli_attrset(&win->attr, style_Input);
 
     if (initlen > maxlen)
         initlen = maxlen;
@@ -389,7 +389,7 @@ static void win_textgrid_init_impl(window_t *win, void *buf, int maxlen, int ini
 
         for (ix=0; ix<initlen; ix++)
         {
-            attrset(&ln->attrs[dwin->inorgx+ix], style_Input);
+            gli_attrset(&ln->attrs[dwin->inorgx+ix], style_Input);
             if (unicode)
                 ln->chars[dwin->inorgx+ix] = ((glui32 *)buf)[ix];
             else
@@ -693,7 +693,7 @@ void gcmd_grid_accept_readline(window_t *win, glui32 arg)
 
             for (ix=dwin->inlen; ix>dwin->incurs; ix--)
                 ln->chars[dwin->inorgx+ix] = ln->chars[dwin->inorgx+ix-1];
-            attrset(&ln->attrs[dwin->inorgx+dwin->inlen], style_Input);
+            gli_attrset(&ln->attrs[dwin->inorgx+dwin->inlen], style_Input);
             ln->chars[dwin->inorgx+dwin->incurs] = arg;
 
             dwin->incurs++;
