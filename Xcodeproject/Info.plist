@@ -277,7 +277,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4</string>
 	<key>NSHighResolutionCapable</key>
-	<false/>
+	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2006-2017 GNU General Public License</string>
 	<key>NSMainNibFile</key>
