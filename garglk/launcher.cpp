@@ -169,7 +169,8 @@ static const std::map<Format, Interpreter> interpreters = {
 
 static bool call_winterp(const std::string &path, const Interpreter &interpreter, const std::string &game)
 {
-    return garglk::winterp(path, GARGLKPRE + interpreter.terp, interpreter.flags, game);
+//    return garglk::winterp(path, GARGLKPRE + interpreter.terp, interpreter.flags, game);
+    return garglk::winterp(path, interpreter.terp, interpreter.flags, game);
 }
 
 static bool runblorb(const std::string &path, const std::string &game, const Interpreter &interpreter)

@@ -778,7 +778,7 @@ void gli_resize_mask(unsigned int x, unsigned int y);
 void gli_move_selection(int x, int y);
 void gli_notification_waiting(void);
 
-void attrset(attr_t *attr, glui32 style);
+void gli_attrset(attr_t *attr, glui32 style);
 void attrclear(attr_t *attr);
 bool attrequal(attr_t *a1, attr_t *a2);
 unsigned char *attrfg(style_t *styles, attr_t *attr);
