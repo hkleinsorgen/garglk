@@ -1,9 +1,9 @@
 option(WITH_TADS "Enable the tads interpreter" ON)
 
 if(WITH_TADS)
-    set(srcs memicmp.c osbuffer.c osextra.c osglk.c osglkban.c osmisc.c osparse.c
-        osportable.cc t23run.cpp t2askf.c t2indlg.c t3askf.cpp t3indlg.cpp
-        vmuni_cs.cpp)
+    set(srcs glk/memicmp.c glk/osbuffer.c glk/osextra.c glk/osglk.c glk/osglkban.c glk/osmisc.c glk/osparse.c
+        glk/osportable.cc glk/t23run.cpp glk/t2askf.c glk/t2indlg.c glk/t3askf.cpp glk/t3indlg.cpp
+        glk/vmuni_cs.cpp)
 
 
     list(APPEND srcs tads2/argize.c tads2/bif.c tads2/bifgdum.c tads2/cmap.c
