@@ -56,7 +56,6 @@
 bool gli_utf8input = true;
 bool gli_utf8output = true;
 
-bool gli_hires = true;
 float gli_backingscalefactor = 1.0f;
 float gli_zoom = 1.0f;
 
@@ -596,8 +595,6 @@ static void readoneconfig(const std::string &fname, const std::string &argv0, co
             gli_conf_sound = std::stoi(arg);
         } else if (cmd == "fullscreen") {
             gli_conf_fullscreen = std::stoi(arg);
-        } else if (cmd == "hires") {
-            gli_hires = std::stoi(arg);
         } else if (cmd == "zoom") {
             gli_zoom = std::stof(arg);
         } else if (cmd == "speak") {
@@ -734,8 +731,7 @@ void gli_startup(int argc, char *argv[])
     if (!gli_baseline)
         gli_baseline = gli_conf_propsize + 0.5;
 
-   if (gli_hires)
-        gli_zoom *= gli_backingscalefactor;
+    gli_zoom *= gli_backingscalefactor;
     gli_baseline = gli_zoom_int(gli_baseline);
     gli_conf_monosize = gli_conf_monosize * gli_zoom;
     gli_conf_propsize = gli_conf_propsize * gli_zoom;

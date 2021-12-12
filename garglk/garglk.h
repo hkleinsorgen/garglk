@@ -259,7 +259,6 @@ extern int gli_wpaddingy;
 extern int gli_tmarginx;
 extern int gli_tmarginy;
 
-extern bool gli_hires;
 extern float gli_backingscalefactor;
 extern float gli_zoom;
 
@@ -390,7 +389,7 @@ struct glk_stream_struct
     /* for strtype_Resource */
     int isbinary;
 
-    /* for strtype_Memory and strtype_Resource. Separate pointers for 
+    /* for strtype_Memory and strtype_Resource. Separate pointers for
        one-byte and four-byte streams */
     unsigned char *buf;
     unsigned char *bufptr;
