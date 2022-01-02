@@ -304,8 +304,8 @@ void winresize(void)
 {
     NSRect viewRect = [gargoyle getWindowSize: processID];
 
-    unsigned int vw = (unsigned int) (NSWidth(viewRect) * gli_backingscalefactor);
-    unsigned int vh = (unsigned int) (NSHeight(viewRect) * gli_backingscalefactor);
+    unsigned int vw = (unsigned int) NSWidth(viewRect);
+    unsigned int vh = (unsigned int) NSHeight(viewRect);
 
     if (gli_image_w == vw && gli_image_h == vh)
         return;
@@ -364,13 +364,6 @@ void winhandler(int signal)
 void wininit(int *argc, char **argv)
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-
-    /* get the backing scale factor */
-    NSRect rect = NSMakeRect(0, 0, 1000, 1);
-    NSView * tmpview = [[NSView alloc] initWithFrame: rect];
-    rect = [tmpview convertRectToBacking: rect];
-    [tmpview release];
-    gli_backingscalefactor = NSWidth(rect)/1000.;
 
     /* establish link to launcher */
     NSString * linkName = [NSString stringWithUTF8String: getenv("GargoyleApp")];
@@ -546,8 +539,8 @@ void winmouse(NSEvent *evt)
 {
     NSPoint coords = [gargoyle getWindowPoint: processID forEvent: evt];
 
-    int x = coords.x * gli_backingscalefactor;
-    int y = gli_image_h - (coords.y * gli_backingscalefactor);
+    int x = coords.x;
+    int y = gli_image_h - coords.y;
 
     /* disregard most events outside of content window */
     if ((coords.y < 0 || y < 0 || x < 0 || x > gli_image_w)

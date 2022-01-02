@@ -502,7 +502,7 @@ void glk_window_get_arrangement(window_t *win, glui32 *method, glui32 *size,
     {
         *size = dwin->size;
         if (dwin->key && (dwin->key->type == wintype_Graphics) && (dwin->dir == winmethod_Fixed))
-            *size = gli_unzoom_int(*size);
+            *size = *size;
     }
     if (keywin)
     {
@@ -593,7 +593,7 @@ void glk_window_set_arrangement(window_t *win, glui32 method, glui32 size, winid
     dwin->key = key;
     dwin->size = size;
     if (key && (key->type == wintype_Graphics) && (newdir == winmethod_Fixed))
-        dwin->size = gli_zoom_int(dwin->size);
+        dwin->size = dwin->size;
     dwin->wborder = ((method & winmethod_BorderMask) == winmethod_Border);
 
     dwin->vertical = (dwin->dir == winmethod_Left || dwin->dir == winmethod_Right);
@@ -632,8 +632,8 @@ void glk_window_get_size(window_t *win, glui32 *width, glui32 *height)
             hgt = hgt / gli_cellh;
             break;
         case wintype_Graphics:
-            wid = gli_unzoom_int(win->bbox.x1 - win->bbox.x0);
-            hgt = gli_unzoom_int(win->bbox.y1 - win->bbox.y0);
+            wid = win->bbox.x1 - win->bbox.x0;
+            hgt = win->bbox.y1 - win->bbox.y0;
             break;
     }
 

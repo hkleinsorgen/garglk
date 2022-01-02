@@ -66,7 +66,6 @@ static const char *winfilters[] =
 }
 
 @property (retain) NSColor * backgroundColor;
-@property float backingScaleFactor;
 
 - (void) addFrame: (NSData *) frame
             width: (unsigned int) width
@@ -209,7 +208,6 @@ static const char *winfilters[] =
     if (retina)
         [view setWantsBestResolutionOpenGLSurface:YES];
     view.backgroundColor = backgroundColor;
-    view.backingScaleFactor = [self backingScaleFactor];
     [self setContentView: view];
 
     eventlog = [[NSMutableArray alloc] initWithCapacity: 100];
@@ -654,12 +652,6 @@ static BOOL isTextbufferEvent(NSEvent * evt)
 
     /* set up the window */
     NSRect rect = NSMakeRect(0, 0, width, height);
-    if (retina)
-    {
-        NSView * tmpview = [[NSView alloc] initWithFrame: rect];
-        rect = [tmpview convertRectFromBacking: rect];
-        [tmpview release];
-    }
     GargoyleWindow * window = [[GargoyleWindow alloc] initWithContentRect: rect
                                                                 styleMask: style
                                                                   backing: NSBackingStoreBuffered
@@ -713,9 +705,7 @@ static BOOL isTextbufferEvent(NSEvent * evt)
 
     if (window)
     {
-        id view = [window contentView];
-        NSPoint point = [event locationInWindow];
-        return point;
+        return [event locationInWindow];
     }
 
     return NSZeroPoint;

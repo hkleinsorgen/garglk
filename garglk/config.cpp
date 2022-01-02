@@ -39,7 +39,6 @@ bool gli_utf8input = true;
 bool gli_utf8output = true;
 
 bool gli_hires = true;
-float gli_backingscalefactor = 1.0f;
 float gli_zoom = 1.0f;
 
 struct gli_font_files gli_conf_prop, gli_conf_mono, gli_conf_prop_override, gli_conf_mono_override;
@@ -614,8 +613,6 @@ void gli_startup(int argc, char *argv[])
     if (!gli_baseline)
         gli_baseline = gli_conf_propsize + 0.5;
 
-   if (gli_hires)
-        gli_zoom *= gli_backingscalefactor;
     gli_baseline = gli_zoom_int(gli_baseline);
     gli_conf_monosize = gli_conf_monosize * gli_zoom;
     gli_conf_propsize = gli_conf_propsize * gli_zoom;
