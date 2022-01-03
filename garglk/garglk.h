@@ -118,8 +118,6 @@ typedef struct window_graphics_s window_graphics_t;
 #define HISTORYLEN 100
 
 #define GLI_SUBPIX 8
-#define gli_zoom_int(x) ((x) * gli_zoom + 0.5)
-#define gli_unzoom_int(x) ((x) / gli_zoom + 0.5)
 
 extern char gli_program_name[256];
 extern char gli_program_info[256];
@@ -240,7 +238,6 @@ extern int gli_tmarginx;
 extern int gli_tmarginy;
 
 extern bool gli_hires;
-extern float gli_zoom;
 
 extern bool gli_conf_lcd;
 extern unsigned char gli_conf_lcd_weights[5];

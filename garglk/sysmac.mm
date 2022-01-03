@@ -426,6 +426,10 @@ void winrepaint(int x0, int y0, int x1, int y1)
 
 void winrefresh(void)
 {
+    if (gli_rootwin) {
+        NSLog(@"Garglk window redraw: %i %i %i %i", gli_rootwin->bbox.x0, gli_rootwin->bbox.y0, gli_rootwin->bbox.x1, gli_rootwin->bbox.y1);
+    }
+
     gli_windows_redraw();
 
     NSData * frame = [NSData dataWithBytesNoCopy: gli_image_rgb

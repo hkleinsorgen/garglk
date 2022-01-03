@@ -41,6 +41,9 @@ bool gli_utf8output = true;
 bool gli_hires = true;
 float gli_zoom = 1.0f;
 
+#define gli_zoom_int(x) ((x) * gli_zoom + 0.5)
+#define gli_unzoom_int(x) ((x) / gli_zoom + 0.5)
+
 struct gli_font_files gli_conf_prop, gli_conf_mono, gli_conf_prop_override, gli_conf_mono_override;
 
 std::string gli_conf_monofont = "Gargoyle Mono";

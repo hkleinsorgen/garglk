@@ -102,6 +102,8 @@ static const char *winfilters[] =
                  [frame bytes]);
     textureWidth = width;
     textureHeight = height;
+
+    NSLog(@"Garglk added frame: %i x %i", width, height);
 }
 
 - (id) initWithFrame:(NSRect)frameRect pixelFormat:(NSOpenGLPixelFormat *)format
@@ -123,6 +125,7 @@ static const char *winfilters[] =
 
     /* Adapt to the current window backing scaling */
     NSRect box = [self convertRectToBacking: NSMakeRect(0, 0, textureWidth, textureHeight)];
+    NSLog(@"Draw box: %i x %i, best: %i", textureWidth, textureHeight, [self wantsBestResolutionOpenGLSurface]);
     glViewport(0.0, 0.0, NSWidth(box), NSHeight(box));
 
     NSColor * clearColor = self.backgroundColor;
@@ -692,7 +695,9 @@ static BOOL isTextbufferEvent(NSEvent * evt)
     {
         id view = [window contentView];
         NSRect rect = [view bounds];
-        return rect;
+        NSRect backingRect = [window convertRectToBacking: rect];
+        NSLog(@"View rect: %f x %f, backing: %f x %f", NSWidth(rect), NSHeight(rect), NSWidth(backingRect), NSHeight(backingRect));
+        return backingRect;
     }
 
     return NSZeroRect;
@@ -776,7 +781,7 @@ static BOOL isTextbufferEvent(NSEvent * evt)
         [[window contentView] addFrame: frame
                                  width: width
                                 height: height];
-
+        NSLog(@"Garglk set window contents: %i x %i", width, height);
         NSRect rect = NSMakeRect(0, 0, width, height);
         if ([[window contentView] wantsBestResolutionOpenGLSurface])
             rect = [[window contentView] convertRectFromBacking: rect];
