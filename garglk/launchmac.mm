@@ -707,8 +707,12 @@ static BOOL isTextbufferEvent(NSEvent * evt)
     GargoyleWindow * window = [windows objectForKey: [NSNumber numberWithInt: processID]];
 
     if (window)
-    {
-        return [event locationInWindow];
+    {  
+        // convertPointToBacking: would require >= 10.14
+        NSPoint location = [event locationInWindow];
+        NSRect rect = NSMakeRect(0, 0, location.x, location.y);
+        NSRect backingRect = [window convertRectToBacking: rect];
+        return NSMakePoint(NSWidth(backingRect), NSHeight(backingRect));
     }
 
     return NSZeroPoint;
