@@ -237,8 +237,6 @@ extern int gli_wpaddingy;
 extern int gli_tmarginx;
 extern int gli_tmarginy;
 
-extern bool gli_hires;
-
 extern bool gli_conf_lcd;
 extern unsigned char gli_conf_lcd_weights[5];
 

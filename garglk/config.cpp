@@ -38,7 +38,6 @@
 bool gli_utf8input = true;
 bool gli_utf8output = true;
 
-bool gli_hires = true;
 float gli_zoom = 1.0f;
 
 #define gli_zoom_int(x) ((x) * gli_zoom + 0.5)
@@ -496,8 +495,6 @@ static void readoneconfig(const std::string &fname, const std::string &argv0, co
             gli_conf_sound = std::stoi(arg);
         } else if (cmd == "fullscreen") {
             gli_conf_fullscreen = std::stoi(arg);
-        } else if (cmd == "hires") {
-            gli_hires = std::stoi(arg);
         } else if (cmd == "zoom") {
             gli_zoom = std::stof(arg);
         } else if (cmd == "speak") {
