@@ -123,10 +123,8 @@ static const char *winfilters[] =
 
     [[self openGLContext] makeCurrentContext];
 
-    /* Adapt to the current window backing scaling */
-    NSRect box = [self convertRectToBacking: NSMakeRect(0, 0, textureWidth, textureHeight)];
-    NSLog(@"Draw box: %i x %i, best: %i", textureWidth, textureHeight, [self wantsBestResolutionOpenGLSurface]);
-    glViewport(0.0, 0.0, NSWidth(box), NSHeight(box));
+    NSLog(@"Draw OpenGL: %i x %i, best: %i", textureWidth, textureHeight, [self wantsBestResolutionOpenGLSurface]);
+    glViewport(0.0, 0.0, textureWidth, textureHeight);
 
     NSColor * clearColor = self.backgroundColor;
     glClearColor([clearColor redComponent], [clearColor greenComponent], [clearColor blueComponent], [clearColor alphaComponent]);
