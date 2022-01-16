@@ -20,6 +20,10 @@ set(WITH_TTS "AUTO" CACHE STRING "Enable text-to-speech support (ON/OFF/AUTO)")
 set(GARGLKPRE "" CACHE STRING "Binary prefix")
 set(SOUND "SDL" CACHE STRING "Backend to use for sound (SDL, QT, or none)")
 
+if(INTERFACE STREQUAL "QT")
+    option(WITH_NATIVE_FILE_DIALOGS "Use native dialogs instead of Qt dialogs" ON)
+endif()
+
 vtk_encode_string(
     INPUT garglk.ini
     NAME garglkini
@@ -33,6 +37,10 @@ set_property(SOURCE config.cpp PROPERTY COMPILE_DEFINITIONS GARGLKINI_H="${GARGL
 if(INTERFACE STREQUAL "QT")
     set(CMAKE_AUTOMOC ON)
     set_property(SOURCE garglkini.cxx PROPERTY SKIP_AUTOMOC ON)
+
+    if(NOT WITH_NATIVE_FILE_DIALOGS)
+        set_property(SOURCE sysqt.cpp launchqt.cpp PROPERTY COMPILE_DEFINITIONS GARGLK_NO_NATIVE_FILE_DIALOGS)
+    endif()
 endif()
 
 add_library(garglk babeldata.c style.c config.cpp draw.cpp
@@ -56,7 +64,7 @@ cxx_standard(garglk ${CXX_VERSION})
 warnings(garglk)
 
 if(UNIX AND NOT APPLE)
-target_compile_definitions(garglk PRIVATE "GARGLKINI=\"${GARGLKINI}\"")
+    target_compile_definitions(garglk PRIVATE "GARGLKINI=\"${GARGLKINI}\"")
 endif()
 
 if(INTERFACE STREQUAL "COCOA")
@@ -69,7 +77,7 @@ endif()
 target_compile_definitions(garglk PRIVATE "_XOPEN_SOURCE=600")
 
 if(WITH_LAUNCHER)
-    add_executable(gargoyle launcher.cpp)
+    add_executable(gargoyle WIN32 launcher.cpp)
     target_include_directories(gargoyle PRIVATE cheapglk)
     target_link_libraries(gargoyle PRIVATE garglk)
     target_compile_definitions(gargoyle PRIVATE "_XOPEN_SOURCE=600")

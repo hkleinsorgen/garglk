@@ -37,6 +37,16 @@
 #include <filesystem>
 #endif
 
+#ifdef _WIN32
+#include <shlwapi.h>
+#else
+#include <fnmatch.h>
+#endif
+
+#ifdef __HAIKU__
+#include <FindDirectory.h>
+#endif
+
 #include "glk.h"
 #include "glkstart.h"
 #include "garglk.h"
@@ -211,13 +221,15 @@ static void parsecolor(const std::string &str, unsigned char *rgb)
 // 1. Name of game file with extension replaced by .ini (e.g. zork1.z3
 //    becomes zork1.ini)
 // 2. <directory containing game file>/garglk.ini
-// 3. %APPDATA%/Gargoyle/garglk.ini (Windows only)
-// 4. <current directory>/garglk.ini
-// 5. $XDG_CONFIG_HOME/garglk.ini or $HOME/.config/garglk.ini
-// 6. $HOME/.garglkrc
-// 7. $GARGLK_INI/garglk.ini (macOS only)
-// 8. /etc/garglk.ini (or other location set at build time, Unix only)
-// 9. <directory containing gargoye executable>/garglk.ini (Windows only)
+// 3. Platform-specific locations:
+//        $XDG_CONFIG_HOME/garglk.ini or $HOME/.config/garglk.ini (Unix only)
+//        $HOME/.garglkrc (Unix only)
+//        <user settings directory>/Gargoyle (Haiku only)
+//        %APPDATA%/Gargoyle/garglk.ini (Windows only)
+//        <current directory>/garglk.ini (Windows only)
+// 4. $GARGLK_INI/garglk.ini (macOS only)
+// 5. /etc/garglk.ini (or other location set at build time, Unix only)
+// 6. <directory containing gargoyle executable>/garglk.ini (Windows only)
 //
 // exedir is the directory containing the gargoyle executable
 // gamepath is the path to the game file being run
@@ -249,7 +261,11 @@ std::vector<garglk::ConfigFile> garglk::configs(const std::string &exedir = "", 
         configs.push_back(ConfigFile(config, false));
     }
 
-#ifdef _WIN32
+#if defined(__HAIKU__)
+    char settings_dir[PATH_MAX + 1];
+    if (find_directory(B_USER_SETTINGS_DIRECTORY, -1, false, settings_dir, sizeof settings_dir) == B_OK)
+        configs.push_back(ConfigFile(std::string(settings_dir) + "/Gargoyle", true));
+#elif defined(_WIN32)
     // $APPDATA/Gargoyle/garglk.ini (Windows only). This has a higher
     // priority than $PWD/garglk.ini since it's a more "proper" location.
     const char *appdata = std::getenv("APPDATA");
@@ -261,10 +277,6 @@ std::vector<garglk::ConfigFile> garglk::configs(const std::string &exedir = "", 
     // so treat it as a user config there.
     configs.push_back(ConfigFile("garglk.ini", true));
 #else
-    // This could be anywhere, so don't treat it as a user config.
-    configs.push_back(ConfigFile("garglk.ini", false));
-#endif
-
     // XDG Base Directory Specification
     std::string xdg_path;
     const char *xdg = getenv("XDG_CONFIG_HOME");
@@ -286,6 +298,7 @@ std::vector<garglk::ConfigFile> garglk::configs(const std::string &exedir = "", 
     const char *home = std::getenv("HOME");
     if (home != nullptr)
         configs.push_back(ConfigFile(std::string(home) + "/.garglkrc", true));
+#endif
 
 #ifdef __APPLE__
     // macOS sets $GARGLK_INI to the bundle directory containing a
@@ -386,7 +399,20 @@ void garglk::config_entries(const std::string &fname, bool accept_bare, const st
         if (line[0] == '[' && line.back() == ']')
         {
             accept = std::any_of(matches.begin(), matches.end(),[&line](const std::string &match) {
-                return garglk::downcase(line).find(garglk::downcase(match)) != std::string::npos;
+                std::istringstream s(line.substr(1, line.size() - 2));
+                std::string pattern;
+                while (s >> pattern)
+                {
+#ifdef _WIN32
+                    if (PathMatchSpec(garglk::downcase(match).c_str(), garglk::downcase(pattern).c_str()))
+#else
+                    if (fnmatch(garglk::downcase(pattern).c_str(), garglk::downcase(match).c_str(), 0) == 0)
+#endif
+                    {
+                        return true;
+                    }
+                }
+                return false;
             });
             continue;
         }
@@ -623,6 +649,23 @@ static void readoneconfig(const std::string &fname, const std::string &argv0, co
 
 static void gli_read_config(int argc, char **argv)
 {
+#if __cplusplus >= 201703L
+    /* load argv0 with name of executable without suffix */
+    std::string argv0 = std::filesystem::path(argv[0])
+        .filename()
+        .replace_extension()
+        .string();
+
+    /* load gamefile with basename of last argument */
+    std::string gamefile = std::filesystem::path(argv[argc - 1])
+        .filename()
+        .string();
+
+    /* load exefile with directory containing main executable */
+    std::string exedir = std::filesystem::path(argv[0])
+        .parent_path()
+        .string();
+#else
     auto basename = [](std::string path) {
         auto slash = path.find_last_of("/\\");
         if (slash != std::string::npos)
@@ -643,6 +686,7 @@ static void gli_read_config(int argc, char **argv)
     /* load exefile with directory containing main executable */
     std::string exedir = argv[0];
     exedir = exedir.substr(0, exedir.find_last_of("/\\"));
+#endif
 
     /* load gamepath with the path to the story file itself */
     std::string gamepath;
